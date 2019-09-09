@@ -7,7 +7,7 @@ type NumOrStr = number | string;
  * @param array Array to validate
  * @param operators Array of string of operators
  */
-export const validateForDisplay = (array: NumOrStr[], operators: string[]) => {
+export const validateForDisplay = ({array, operators}: {array: NumOrStr[]; operators: string[];}) => {
 	return array.every(
 			(v, i) => (i % 2 == 0 && typeof(v) === 'number')
 			|| (i % 2 == 1 && operators.includes(v.toString()))
@@ -22,8 +22,8 @@ export const validateForDisplay = (array: NumOrStr[], operators: string[]) => {
  * @param numberLength Number of numbers in the question
  * @param operators Array of string of operators
  */
-export const validateForSubmission = (array: NumOrStr[], numberLength: number, operators: string[]) => {
-	return array.length == 2*numberLength - 1 && validateForDisplay(array, operators)
+export const validateForSubmission = ({array, numberLength, operators}: {array: NumOrStr[]; numberLength: number; operators: string[];}) => {
+	return array.length == 2*numberLength - 1 && validateForDisplay({array, operators})
 }
 
 /**
@@ -85,9 +85,10 @@ export const calculate = (array: NumOrStr[]) => {
  * Question, expected answer and solution generator
  * @param numberLength Number of numbers in the question
  * @param operators Array of string of operators
+ * @param integerAnswer Boolean to set whether the answer must be integer or not
  */
 
-export const generate = (numberLength : number = 5, operators : string[] = ['+', '-', '*', '/']) : {
+export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], integerAnswer = true}: {numberLength : number; operators : string[]; integerAnswer : boolean}) : {
 	question: number[],
 	operators: string[],
 	expectedAnswer: number,
@@ -96,8 +97,13 @@ export const generate = (numberLength : number = 5, operators : string[] = ['+',
 	let expression : NumOrStr[] = null;
 	let numbers : number[] = null;
 	let operations : string[] = null;
+	let expectedAnswer : number = null;
 	// check if the expression is generated and finite (not Infinity or NaN)
-	while (!(expression !== null && isFinite(calculate(expression)))) {
+	while (!(expression !== null
+		&& isFinite(expectedAnswer)
+		&& (!integerAnswer || Math.floor(expectedAnswer) === expectedAnswer) // if integerAnswer is true, check whether the expectedAnswer is integer
+		)
+	) {
 		// generate random numbers from 1 to 9, into an array of numberLength numbers
 		// example: [4, 2, 6, 9, 2]
 		numbers = Array.from({length: numberLength}, () => Math.floor(Math.random() * 9 + 1));
@@ -110,11 +116,13 @@ export const generate = (numberLength : number = 5, operators : string[] = ['+',
 		// example: [4, '+', 2, '-', 6, '/', 9, '*', 2]
 		expression = [].concat(...numbers.map((v, i) => [v, operations[i]])); // returns [4, '+', 2, '-', 6, '/', 9, '*', 2, undefined]
 		expression.pop(); // remove undefined element
+
+		expectedAnswer = calculate(expression);
 	}
 	return {
 		question: numbers,
 		operators: operators,
-		expectedAnswer: calculate(expression),
+		expectedAnswer: expectedAnswer,
 		solution: expression
 	};
 }
@@ -122,7 +130,11 @@ export const generate = (numberLength : number = 5, operators : string[] = ['+',
 
 // examples
 
-const {question, operators, expectedAnswer, solution} = generate();
+const {question, operators, expectedAnswer, solution} = generate({
+	numberLength: 5,
+	operators: ['+', '-', '*', '/'],
+	integerAnswer: true
+});
 
 console.log('question: ', question);
 console.log('valid operators', operators);
