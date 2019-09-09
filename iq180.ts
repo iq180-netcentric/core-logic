@@ -1,8 +1,34 @@
 type NumOrStr = number | string;
 
 /**
+ * Function validateForDisplay
+ * performs validation of the array given the conditions
+ * for showing the results of the expressions only
+ * @param array Array to validate
+ * @param operators Array of string of operators
+ */
+export const validateForDisplay = (array: NumOrStr[], operators: string[]) => {
+	return array.every(
+			(v, i) => (i % 2 == 0 && typeof(v) === 'number')
+			|| (i % 2 == 1 && operators.includes(v.toString()))
+		)
+}
+
+/**
+ * Function validateForSubmission
+ * performs validation of the array given the conditions, including the length of question
+ * in order to submit the answer
+ * @param array Array to validate
+ * @param numberLength Number of numbers in the question
+ * @param operators Array of string of operators
+ */
+export const validateForSubmission = (array: NumOrStr[], numberLength: number, operators: string[]) => {
+	return array.length == 2*numberLength - 1 && validateForDisplay(array, operators)
+}
+
+/**
  * Function calculate
- * performs calculation over the array using the PEMDASv
+ * performs calculation over the array using the PEMDAS
  * this is done to avoid using eval() function as it is very dangerous and very not cool UwU
  * @param array Array of expressions that contain numbers and strings
  */
@@ -63,6 +89,7 @@ export const calculate = (array: NumOrStr[]) => {
 
 export const generate = (numberLength : number = 5, operators : string[] = ['+', '-', '*', '/']) : {
 	question: number[],
+	operators: string[],
 	expectedAnswer: number,
 	solution: NumOrStr[],
 } => {
@@ -86,6 +113,7 @@ export const generate = (numberLength : number = 5, operators : string[] = ['+',
 	}
 	return {
 		question: numbers,
+		operators: operators,
 		expectedAnswer: calculate(expression),
 		solution: expression
 	};
@@ -94,8 +122,9 @@ export const generate = (numberLength : number = 5, operators : string[] = ['+',
 
 // examples
 
-const {question, expectedAnswer, solution} = generate();
+const {question, operators, expectedAnswer, solution} = generate();
 
-console.log('question: ', question)
-console.log('expected answer: ', expectedAnswer)
-console.log('solution: ', solution)
+console.log('question: ', question);
+console.log('valid operators', operators);
+console.log('expected answer: ', expectedAnswer);
+console.log('solution: ', solution);
