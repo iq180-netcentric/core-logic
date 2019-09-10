@@ -27,6 +27,33 @@ export const validateForSubmission = ({array, numberLength, operators}: {array: 
 }
 
 /**
+ * Function highlightWrongLocation
+ * highlights the location where the expression is invalid
+ * by highlighting the number/operator that has the same data type as the previous element,
+ * and highlights if your first and last element is not a number
+ * @param array Array to highlight 
+ */
+export const highlightWrongLocation = ({array}: {array: NumOrStr[]}) => {
+	let validIndex : number[] = [];
+	let typeCheck : string = 'number'; // first valid element must be a number
+	for (let i = 0; i < array.length; i++) {
+		if (typeof(array[i]) === typeCheck) {
+			if (typeCheck === 'number') {
+				typeCheck = 'string';
+			} else if (typeCheck === 'string') {
+				typeCheck = 'number';
+			}
+			validIndex.push(i)
+		}
+	}
+	if (typeof(array[validIndex[validIndex.length-1]]) === 'string') { // last valid element must be a number
+		validIndex.pop();
+	}
+	// returns the set of {0 to array.length} - set of valid indexes
+	return Array.from({length: array.length}, (_, k) => k).filter(i => !validIndex.includes(i));
+}
+
+/**
  * Function calculate
  * performs calculation over the array using the PEMDAS
  * this is done to avoid using eval() function as it is very dangerous and very not cool UwU
