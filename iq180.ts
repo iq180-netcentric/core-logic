@@ -4,13 +4,16 @@ type NumOrStr = number | string;
  * Function validateForDisplay
  * performs validation of the array given the conditions
  * for showing the results of the expressions only
+ * array must be alternating between number and string, starts and ends with number
  * @param array Array to validate
  * @param operators Array of string of operators
  */
 export const validateForDisplay = ({array, operators}: {array: NumOrStr[]; operators: string[];}) => {
-	return array.every(
-			(v, i) => (i % 2 == 0 && typeof(v) === 'number')
-			|| (i % 2 == 1 && operators.includes(v.toString()))
+	return array.length === 0 || // if no input, pass
+		array.length % 2 === 1 &&
+		array.every(
+			(v, i) => (i % 2 === 0 && typeof(v) === 'number')
+			|| (i % 2 === 1 && operators.includes(v.toString()))
 		)
 }
 
