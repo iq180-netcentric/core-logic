@@ -193,7 +193,15 @@ export const calculate = (array: NumOrStr[]) => {
  * @param integerAnswer Boolean to set whether the answer must be integer or not
  */
 
-export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], integerAnswer = true}: {numberLength : number; operators : string[]; integerAnswer : boolean}) : {
+export const generate = ({
+	numberLength = 5,
+	operators = ['+', '-', '*', '/'],
+	integerAnswer = true
+}: {
+	numberLength? : number;
+	operators? : string[];
+	integerAnswer? : boolean
+} = {}) : {
 	question: number[],
 	operators: string[],
 	expectedAnswer: number,
@@ -222,6 +230,12 @@ export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], i
 		expression = [].concat(...numbers.map((v, i) => [v, operations[i]])); // returns [4, '+', 2, '-', 6, '/', 9, '*', 2, undefined]
 		expression.pop(); // remove undefined element
 
+		const numberBrackets = Math.floor(Math.random() * 5 + 1);
+		if (numberBrackets) {
+			const openBracketsPosition = Array.from({length: numberBrackets}, () => Math.floor(Math.random() * 9 + 1)).sort().reverse();
+			const closeBracketsPosition = Array.from({length: numberBrackets}, () => Math.floor(Math.random() * 9 + 1)).sort().reverse();
+			// openBracketsPosition.forEach(value => expression.splice(value, 0, '('));
+		}
 		expectedAnswer = calculate(expression);
 	}
 	return {
@@ -231,10 +245,6 @@ export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], i
 		solution: expression
 	};
 }
-
-// console.log(generate(
-// 	{numberLength: 5, operators: ['+', '-', '*', '/'], integerAnswer: true}
-// ), "1+2+3+4+5")
 
 // examples
 
