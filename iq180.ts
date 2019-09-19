@@ -38,28 +38,69 @@ export const validateForDisplay = ({array, operators}: {array: NumOrStr[]; opera
 /**
  * Function highlightWrongLocation
  * highlights the location where the expression is invalid
- * by highlighting the number/operator that has the same data type as the previous element,
- * and highlights if your first and last element is not a number
  * @param array Array to highlight 
  */
 export const highlightWrongLocation = ({array}: {array: NumOrStr[]}) => {
-	let validIndex : number[] = [];
-	let typeCheck : string = 'number'; // first valid element must be a number
-	for (let i = 0; i < array.length; i++) {
-		if (typeof(array[i]) === typeCheck) {
-			if (typeCheck === 'number') {
-				typeCheck = 'string';
-			} else if (typeCheck === 'string') {
-				typeCheck = 'number';
-			}
-			validIndex.push(i)
+	// highlights brackets when there are unequal amount of brackets
+	// ex: (,(,(,),) should highlight (,(,*(*,),)
+	let invalidBracketUnequal = [];
+	const bracketsDifference = array.filter(item => item === '(').length - array.filter(item => item === ')').length;
+	if (bracketsDifference) {
+		if (bracketsDifference > 0) {
+			invalidBracketUnequal = array.map((value, index) => {
+				if (value === '(') {
+					return index;
+				}
+			}).filter(value => value !== undefined).filter((_, index) => index > bracketsDifference)
+		} else {
+			invalidBracketUnequal = array.map((value, index) => {
+				if (value === ')') {
+					return index;
+				}
+			}).filter(value => value !== undefined).filter((_, index, indexArr) => index > indexArr.length + bracketsDifference - 1)
 		}
 	}
-	if (typeof(array[validIndex[validIndex.length-1]]) === 'string') { // last valid element must be a number
-		validIndex.pop();
+
+	// highlights brackets when each position has negative difference between brackets
+	// ex: (,(,),),),( should highlight (,(,),),*)*,*(*
+	let currentBracketDifference = 0;
+	let invalidBracketNegDiff = []
+	for (let i = 0; i < array.length; i++) {
+		if ((array[i] === '(' || array[i] === ')') && currentBracketDifference < 0) {
+			invalidBracketNegDiff.push(i);
+		}
+		if (array[i] === '(') {
+			currentBracketDifference++;
+		} else if (array[i] === ')') {
+			currentBracketDifference--;
+		}
 	}
-	// returns the set of {0 to array.length} - set of valid indexes
-	return Array.from({length: array.length}, (_, k) => k).filter(i => !validIndex.includes(i));
+
+	const invalidBracket = [...invalidBracketUnequal, ...invalidBracketNegDiff];
+
+	const invalidAdjacent = array.map((_, index, array) => {
+		if ( ! (
+			// same logic as validateForDisplay, except checking operators
+			(array[index] === '(' &&
+				(array[index+1] === '(' || typeof(array[index+1]) === 'number') &&
+				(array[index-1] !== ')')) ||
+			(array[index] === ')' &&
+				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
+				(array[index+1] !== '(')) ||
+			(array[index] !== '(' && array[index] !== ')' && typeof(array[index]) === 'string' &&
+				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
+				(array[index+1] === '(' || typeof(array[index+1]) === 'number')) ||
+			(typeof(array[index]) === 'number' && (
+				(index === 0 && typeof(array[index+1]) !== 'number') ||
+				(index === array.length-1 && typeof(array[index-1]) !== 'number') ||
+				(typeof(array[index+1]) !== 'number' && typeof(array[index-1]) !== 'number')) &&
+				array[index+1] !== '(' && array[index-1] !== ')')
+			)
+		) {
+			return index;
+		}
+	}).filter(value => value !== undefined);
+	return Array.from(new Set([...invalidBracket, ...invalidAdjacent]));
 }
 
 /**
@@ -167,7 +208,7 @@ export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], i
 		&& isFinite(expectedAnswer)
 		&& (!integerAnswer || Math.floor(expectedAnswer) === expectedAnswer) // if integerAnswer is true, check whether the expectedAnswer is integer
 		)
-	) {
+	) {		
 		// generate random numbers from 1 to 9, into an array of numberLength numbers
 		// example: [4, 2, 6, 9, 2]
 		numbers = Array.from({length: numberLength}, () => Math.floor(Math.random() * 9 + 1));
@@ -190,6 +231,10 @@ export const generate = ({numberLength = 5, operators  = ['+', '-', '*', '/'], i
 		solution: expression
 	};
 }
+
+// console.log(generate(
+// 	{numberLength: 5, operators: ['+', '-', '*', '/'], integerAnswer: true}
+// ), "1+2+3+4+5")
 
 // examples
 
