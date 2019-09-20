@@ -182,8 +182,8 @@ export const calculate = (array: NumOrStr[]) => {
 			i -= 2;
 		}
 	}
-	// return the result of the final remaining number
-	return copyArray[0] as number;
+	// return the result of the final remaining number, precision to 13 decimals
+	return Number(Math.round(Number(copyArray[0]+'e13'))+'e-13');
 }
 
 /**
@@ -225,18 +225,52 @@ export const generate = ({
 		// example: ['+', '-', '/', '*']
 		operations = Array.from({length: numberLength-1}, () => operators[Math.floor(Math.random()*operators.length)]);
 
+		// const numberBrackets = Math.floor(Math.random() * numberLength + 1);
+		const numberBrackets = 1;
+		let openBracketsFrequency = Array(numberLength);
+		let closeBracketsFrequency = Array(numberLength);
+		if (numberBrackets) {
+			openBracketsFrequency = Array(numberLength).fill(0);
+			closeBracketsFrequency = Array(numberLength).fill(0);
+			let openBracketRemaining = numberBrackets;
+			let closeBracketRemaining = numberBrackets;
+			console.log(openBracketRemaining, closeBracketRemaining)
+			for (let i = 0; openBracketRemaining > 0; i = (i+1)%(numberLength-1)) {
+				const random = Math.floor(openBracketRemaining*Math.random() + 0.5);
+				const bracketInsertCount =  random < openBracketRemaining ? random : openBracketRemaining;
+				openBracketsFrequency[i] += bracketInsertCount;
+				openBracketRemaining -= bracketInsertCount;
+			}
+			let cumulativeBracketDiff = 0;
+			for (let i = 1; closeBracketRemaining > 0; i = i%(numberLength-1)+1) {
+				console.log(openBracketsFrequency, closeBracketsFrequency)
+				if (i === 1) {
+					cumulativeBracketDiff = openBracketsFrequency[0];
+				}
+				cumulativeBracketDiff += openBracketsFrequency[i]
+				const random = Math.round(Math.min(closeBracketRemaining, cumulativeBracketDiff)*Math.random()); 
+				closeBracketsFrequency[i] += random;
+				closeBracketRemaining -= random;
+				cumulativeBracketDiff -= random;
+
+				console.log(openBracketsFrequency, closeBracketsFrequency, closeBracketRemaining, cumulativeBracketDiff, random)
+			}
+		}
+		openBracketsFrequency = openBracketsFrequency.map(value => Array(value).fill('('));
+		closeBracketsFrequency = closeBracketsFrequency.map(value => Array(value).fill(')'));
+
+		expression = [];
+		for (let i = 0 ; i < numberLength; i++) {
+			expression = expression.concat(openBracketsFrequency[i], numbers[i], closeBracketsFrequency[i], operations[i])
+		}
 		// join numbers and operations into an array of numbers and operations
 		// example: [4, '+', 2, '-', 6, '/', 9, '*', 2]
-		expression = [].concat(...numbers.map((v, i) => [v, operations[i]])); // returns [4, '+', 2, '-', 6, '/', 9, '*', 2, undefined]
+		// expression = [].concat(...numbers.map((v, i) => [v, operations[i]])); // returns [4, '+', 2, '-', 6, '/', 9, '*', 2, undefined]
 		expression.pop(); // remove undefined element
-
-		const numberBrackets = Math.floor(Math.random() * 5 + 1);
-		if (numberBrackets) {
-			const openBracketsPosition = Array.from({length: numberBrackets}, () => Math.floor(Math.random() * 9 + 1)).sort().reverse();
-			const closeBracketsPosition = Array.from({length: numberBrackets}, () => Math.floor(Math.random() * 9 + 1)).sort().reverse();
-			// openBracketsPosition.forEach(value => expression.splice(value, 0, '('));
-		}
 		expectedAnswer = calculate(expression);
+		console.log(expression)
+		console.log(expression.join(''))
+		console.log(expectedAnswer)
 	}
 	return {
 		question: numbers,
@@ -245,6 +279,8 @@ export const generate = ({
 		solution: expression
 	};
 }
+
+generate()
 
 // examples
 
