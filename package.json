@@ -1,6 +1,6 @@
 {
   "name": "iq180-logic",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "iq180.js",
   "license": "MIT",
   "dependencies": {

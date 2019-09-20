@@ -8,40 +8,6 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 exports.__esModule = true;
 /**
- * Function validateForDisplay
- * performs validation of the array given the conditions
- * for showing the results of the expressions only
- * @param array Array to validate
- * @param operators Array of string of operators
- */
-exports.validateForDisplay = function (_a) {
-    var array = _a.array, operators = _a.operators;
-    return array.length === 0 || // if no input, pass
-        // number of opening brackets == number of closing brackets
-        array.filter(function (item) { return item === '('; }).length === array.filter(function (item) { return item === ')'; }).length &&
-            array.every(function (_, index, array) {
-                // '(' must be followed by '(' or number, and not follow ')'
-                return (array[index] === '(' &&
-                    (array[index + 1] === '(' || typeof (array[index + 1]) === 'number') &&
-                    (array[index - 1] !== ')')) ||
-                    // ')' must follow ')' or number, and not be followed by '('
-                    (array[index] === ')' &&
-                        (array[index - 1] === ')' || typeof (array[index - 1]) === 'number') &&
-                        (array[index + 1] !== '(')) ||
-                    // operators must follow ')' or number, and be followed by '(' or number
-                    (array[index] !== '(' && array[index] !== ')' && typeof (array[index]) === 'string' &&
-                        operators.includes(array[index].toString()) &&
-                        (array[index - 1] === ')' || typeof (array[index - 1]) === 'number') &&
-                        (array[index + 1] === '(' || typeof (array[index + 1]) === 'number')) ||
-                    // numbers must not be adjacent to another number,
-                    // and must not follow ')', and not be followed by '('
-                    (typeof (array[index]) === 'number' && ((index === 0 && typeof (array[index + 1]) !== 'number') ||
-                        (index === array.length - 1 && typeof (array[index - 1]) !== 'number') ||
-                        (typeof (array[index + 1]) !== 'number' && typeof (array[index - 1]) !== 'number')) &&
-                        array[index + 1] !== '(' && array[index - 1] !== ')');
-            });
-};
-/**
  * Function highlightWrongLocation
  * highlights the location where the expression is invalid
  * @param array Array to highlight
@@ -253,6 +219,54 @@ exports.generate = function (_a) {
         expectedAnswer: expectedAnswer,
         solution: expression
     };
+};
+/**
+ * Function validateForDisplay
+ * performs validation of the array given the conditions
+ * for showing the results of the expressions only
+ * @param array Array to validate
+ * @param operators Array of string of operators
+ */
+exports.validateForDisplay = function (_a) {
+    var array = _a.array, operators = _a.operators;
+    return array.length === 0 || // if no input, pass
+        // number of opening brackets == number of closing brackets
+        array.filter(function (item) { return item === '('; }).length === array.filter(function (item) { return item === ')'; }).length &&
+            array.every(function (_, index, array) {
+                // '(' must be followed by '(' or number, and not follow ')'
+                return (array[index] === '(' &&
+                    (array[index + 1] === '(' || typeof (array[index + 1]) === 'number') &&
+                    (array[index - 1] !== ')')) ||
+                    // ')' must follow ')' or number, and not be followed by '('
+                    (array[index] === ')' &&
+                        (array[index - 1] === ')' || typeof (array[index - 1]) === 'number') &&
+                        (array[index + 1] !== '(')) ||
+                    // operators must follow ')' or number, and be followed by '(' or number
+                    (array[index] !== '(' && array[index] !== ')' && typeof (array[index]) === 'string' &&
+                        operators.includes(array[index].toString()) &&
+                        (array[index - 1] === ')' || typeof (array[index - 1]) === 'number') &&
+                        (array[index + 1] === '(' || typeof (array[index + 1]) === 'number')) ||
+                    // numbers must not be adjacent to another number,
+                    // and must not follow ')', and not be followed by '('
+                    (typeof (array[index]) === 'number' && ((index === 0 && typeof (array[index + 1]) !== 'number') ||
+                        (index === array.length - 1 && typeof (array[index - 1]) !== 'number') ||
+                        (typeof (array[index + 1]) !== 'number' && typeof (array[index - 1]) !== 'number')) &&
+                        array[index + 1] !== '(' && array[index - 1] !== ')');
+            });
+};
+/**
+ * Function validateForSubmission
+ * performs validation of the array given the conditions, including the length of question
+ * in order to submit the answer
+ * @param array Array to validate
+ * @param numberLength Number of numbers in the question
+ * @param operators Array of string of operators
+ */
+exports.validateForSubmission = function (_a) {
+    var array = _a.array, operators = _a.operators, question = _a.question, expectedAnswer = _a.expectedAnswer;
+    return exports.validateForDisplay({ array: array, operators: operators })
+        && array.filter(function (item) { return typeof (item) === 'number'; }).sort().toString() === question.sort().toString()
+        && exports.calculate(array) === expectedAnswer;
 };
 // examples
 // const {question, operators, expectedAnswer, solution} = generate({

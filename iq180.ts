@@ -1,41 +1,6 @@
 type NumOrStr = number | string;
 
 /**
- * Function validateForDisplay
- * performs validation of the array given the conditions
- * for showing the results of the expressions only
- * @param array Array to validate
- * @param operators Array of string of operators
- */
-export const validateForDisplay = ({array, operators}: {array: NumOrStr[]; operators: string[];}) => {
-	return array.length === 0 || // if no input, pass
-		// number of opening brackets == number of closing brackets
-		array.filter(item => item === '(').length === array.filter(item => item === ')').length &&
-		array.every((_, index, array) =>
-			// '(' must be followed by '(' or number, and not follow ')'
-			(array[index] === '(' &&
-				(array[index+1] === '(' || typeof(array[index+1]) === 'number') &&
-				(array[index-1] !== ')')) ||
-			// ')' must follow ')' or number, and not be followed by '('
-			(array[index] === ')' &&
-				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
-				(array[index+1] !== '(')) ||
-			// operators must follow ')' or number, and be followed by '(' or number
-			(array[index] !== '(' && array[index] !== ')' && typeof(array[index]) === 'string' &&
-				operators.includes(array[index].toString()) && 
-				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
-				(array[index+1] === '(' || typeof(array[index+1]) === 'number')) ||
-			// numbers must not be adjacent to another number,
-			// and must not follow ')', and not be followed by '('
-			(typeof(array[index]) === 'number' && (
-				(index === 0 && typeof(array[index+1]) !== 'number') ||
-				(index === array.length-1 && typeof(array[index-1]) !== 'number') ||
-				(typeof(array[index+1]) !== 'number' && typeof(array[index-1]) !== 'number')) &&
-				array[index+1] !== '(' && array[index-1] !== ')')
-		);
-}
-
-/**
  * Function highlightWrongLocation
  * highlights the location where the expression is invalid
  * @param array Array to highlight 
@@ -272,6 +237,65 @@ export const generate = ({
 		expectedAnswer: expectedAnswer,
 		solution: expression
 	};
+}
+
+/**
+ * Function validateForDisplay
+ * performs validation of the array given the conditions
+ * for showing the results of the expressions only
+ * @param array Array to validate
+ * @param operators Array of string of operators
+ */
+export const validateForDisplay = ({array, operators}: {array: NumOrStr[]; operators: string[];}) => {
+	return array.length === 0 || // if no input, pass
+		// number of opening brackets == number of closing brackets
+		array.filter(item => item === '(').length === array.filter(item => item === ')').length &&
+		array.every((_, index, array) =>
+			// '(' must be followed by '(' or number, and not follow ')'
+			(array[index] === '(' &&
+				(array[index+1] === '(' || typeof(array[index+1]) === 'number') &&
+				(array[index-1] !== ')')) ||
+			// ')' must follow ')' or number, and not be followed by '('
+			(array[index] === ')' &&
+				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
+				(array[index+1] !== '(')) ||
+			// operators must follow ')' or number, and be followed by '(' or number
+			(array[index] !== '(' && array[index] !== ')' && typeof(array[index]) === 'string' &&
+				operators.includes(array[index].toString()) && 
+				(array[index-1] === ')' || typeof(array[index-1]) === 'number') &&
+				(array[index+1] === '(' || typeof(array[index+1]) === 'number')) ||
+			// numbers must not be adjacent to another number,
+			// and must not follow ')', and not be followed by '('
+			(typeof(array[index]) === 'number' && (
+				(index === 0 && typeof(array[index+1]) !== 'number') ||
+				(index === array.length-1 && typeof(array[index-1]) !== 'number') ||
+				(typeof(array[index+1]) !== 'number' && typeof(array[index-1]) !== 'number')) &&
+				array[index+1] !== '(' && array[index-1] !== ')')
+		);
+}
+
+/**
+ * Function validateForSubmission
+ * performs validation of the array given the conditions, including the length of question
+ * in order to submit the answer
+ * @param array Array to validate
+ * @param numberLength Number of numbers in the question
+ * @param operators Array of string of operators
+ */
+export const validateForSubmission = ({
+	array,
+	operators,
+	question,
+	expectedAnswer,
+}: {
+	array: NumOrStr[];
+	operators: string[];
+	question: number[];
+	expectedAnswer: number,
+}) => {
+	return validateForDisplay({array, operators})
+		&& array.filter(item => typeof(item) === 'number').sort().toString() === question.sort().toString()
+		&& calculate(array) === expectedAnswer;
 }
 
 // examples
