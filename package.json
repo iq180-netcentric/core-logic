@@ -1,0 +1,13 @@
+{
+  "name": "iq180-logic",
+  "version": "1.0.8",
+  "main": "iq180.js",
+  "license": "MIT",
+  "dependencies": {
+    "ts-node": "^8.3.0",
+    "typescript": "^3.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.4"
+  }
+}
