@@ -234,7 +234,6 @@ export const generate = ({
 			closeBracketsFrequency = Array(numberLength).fill(0);
 			let openBracketRemaining = numberBrackets;
 			let closeBracketRemaining = numberBrackets;
-			console.log(openBracketRemaining, closeBracketRemaining)
 			for (let i = 0; openBracketRemaining > 0; i = (i+1)%(numberLength-1)) {
 				const random = Math.floor(openBracketRemaining*Math.random() + 0.5);
 				const bracketInsertCount =  random < openBracketRemaining ? random : openBracketRemaining;
@@ -243,7 +242,6 @@ export const generate = ({
 			}
 			let cumulativeBracketDiff = 0;
 			for (let i = 1; closeBracketRemaining > 0; i = i%(numberLength-1)+1) {
-				console.log(openBracketsFrequency, closeBracketsFrequency)
 				if (i === 1) {
 					cumulativeBracketDiff = openBracketsFrequency[0];
 				}
@@ -253,7 +251,6 @@ export const generate = ({
 				closeBracketRemaining -= random;
 				cumulativeBracketDiff -= random;
 
-				console.log(openBracketsFrequency, closeBracketsFrequency, closeBracketRemaining, cumulativeBracketDiff, random)
 			}
 		}
 		openBracketsFrequency = openBracketsFrequency.map(value => Array(value).fill('('));
@@ -268,9 +265,6 @@ export const generate = ({
 		// expression = [].concat(...numbers.map((v, i) => [v, operations[i]])); // returns [4, '+', 2, '-', 6, '/', 9, '*', 2, undefined]
 		expression.pop(); // remove undefined element
 		expectedAnswer = calculate(expression);
-		console.log(expression)
-		console.log(expression.join(''))
-		console.log(expectedAnswer)
 	}
 	return {
 		question: numbers,
@@ -279,8 +273,6 @@ export const generate = ({
 		solution: expression
 	};
 }
-
-generate()
 
 // examples
 
